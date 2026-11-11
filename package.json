@@ -1,0 +1,18 @@
+{
+  "name": "huellas-felices-contacto",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Servicio mínimo para recibir el formulario del ejercicio Huellas Felices",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
+
