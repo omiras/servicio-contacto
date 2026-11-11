@@ -6,11 +6,13 @@ Servicio mínimo con Node.js y Express para recibir el formulario del supuesto p
 
 | Campo | Validación |
 |---|---|
-| `nombre` | Obligatorio, máximo 60 caracteres |
-| `correo` | Obligatorio, máximo 254 caracteres y formato de correo válido |
-| `comentario` | Obligatorio, máximo 500 caracteres |
+| `name` | Obligatorio, máximo 60 caracteres |
+| `email` | Obligatorio, máximo 254 caracteres y formato de correo válido |
+| `message` | Obligatorio, máximo 500 caracteres |
 
 El formulario debe usar `method="post"` y enviar los datos a `/contacto`.
+
+El servicio valida los campos en el orden `name`, `email` y `message`. Si encuentra un error, detiene la validación y devuelve un mensaje HTML destacado en la parte superior que identifica el primer campo incorrecto. Cuando los datos son válidos, devuelve el mensaje de confirmación con los datos enviados por el usuario en negrita.
 
 ## Ejecución local
 
@@ -37,9 +39,9 @@ El puerto se obtiene de `process.env.PORT`, como requiere Render, y utiliza el p
 
 ```html
 <form action="http://localhost:3000/contacto" method="post">
-  <input type="text" name="nombre" maxlength="60" required>
-  <input type="email" name="correo" maxlength="254" required>
-  <textarea name="comentario" maxlength="500" required></textarea>
+  <input type="text" name="name" maxlength="60" required>
+  <input type="email" name="email" maxlength="254" required>
+  <textarea name="message" maxlength="500" required></textarea>
   <button type="submit">Enviar</button>
 </form>
 ```

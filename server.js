@@ -6,9 +6,9 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const LIMITES = {
-  nombre: 60,
-  correo: 254,
-  comentario: 500
+  name: 60,
+  email: 254,
+  message: 500
 };
 
 app.use(express.urlencoded({ extended: false, limit: "10kb" }));
@@ -18,8 +18,8 @@ function esTexto(valor) {
   return typeof valor === "string";
 }
 
-function esCorreoValido(correo) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo);
+function esCorreoValido(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 function escaparHtml(texto) {
@@ -31,7 +31,7 @@ function escaparHtml(texto) {
     .replaceAll("'", "&#039;");
 }
 
-function crearPagina(titulo, mensaje, esError = false) {
+function crearPagina(titulo, mensajeHtml, esError = false) {
   const color = esError ? "#a83232" : "#2f6f61";
 
   return `<!doctype html>
@@ -44,39 +44,31 @@ function crearPagina(titulo, mensaje, esError = false) {
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
       padding: 24px;
       color: #27332f;
-      background-color: #f7f3ec;
+      background-color: #ffffff;
       font-family: Arial, Verdana, sans-serif;
     }
     main {
-      width: 100%;
-      max-width: 760px;
-      padding: 36px;
-      background-color: #ffffff;
-      border: 2px solid ${color};
-      border-radius: 12px;
-      text-align: center;
+      padding: 18px 22px;
+      background-color: #f7f3ec;
+      border-left: 5px solid ${color};
     }
     h1 {
       margin-top: 0;
       color: ${color};
-      font-size: 2rem;
+      font-size: 1.5rem;
     }
     p {
       margin-bottom: 0;
-      font-size: 1.3rem;
+      font-size: 1.1rem;
     }
   </style>
 </head>
 <body>
   <main>
     <h1>${escaparHtml(titulo)}</h1>
-    <p>${escaparHtml(mensaje)}</p>
+    <p>${mensajeHtml}</p>
   </main>
 </body>
 </html>`;
@@ -86,7 +78,7 @@ function responderHtml(res, estado, titulo, mensaje, esError = false) {
   return res
     .status(estado)
     .type("html")
-    .send(crearPagina(titulo, mensaje, esError));
+    .send(crearPagina(titulo, escaparHtml(mensaje), esError));
 }
 
 app.get("/", (req, res) => {
@@ -103,90 +95,90 @@ app.get("/salud", (req, res) => {
 });
 
 app.post("/contacto", (req, res) => {
-  const { nombre, correo, comentario } = req.body;
+  const { name, email, message } = req.body;
 
-  if (!esTexto(nombre) || nombre.trim().length === 0) {
+  if (!esTexto(name) || name.trim().length === 0) {
     return responderHtml(
       res,
       400,
-      "Error en el campo nombre",
+      "Error en el campo name",
       "El nombre es obligatorio.",
       true
     );
   }
 
-  const nombreLimpio = nombre.trim();
+  const nameLimpio = name.trim();
 
-  if (nombreLimpio.length > LIMITES.nombre) {
+  if (nameLimpio.length > LIMITES.name) {
     return responderHtml(
       res,
       400,
-      "Error en el campo nombre",
-      `El nombre no puede superar los ${LIMITES.nombre} caracteres.`,
+      "Error en el campo name",
+      `El nombre no puede superar los ${LIMITES.name} caracteres.`,
       true
     );
   }
 
-  if (!esTexto(correo) || correo.trim().length === 0) {
+  if (!esTexto(email) || email.trim().length === 0) {
     return responderHtml(
       res,
       400,
-      "Error en el campo correo",
+      "Error en el campo email",
       "El correo electrónico es obligatorio.",
       true
     );
   }
 
-  const correoLimpio = correo.trim();
+  const emailLimpio = email.trim();
 
-  if (correoLimpio.length > LIMITES.correo) {
+  if (emailLimpio.length > LIMITES.email) {
     return responderHtml(
       res,
       400,
-      "Error en el campo correo",
-      `El correo no puede superar los ${LIMITES.correo} caracteres.`,
+      "Error en el campo email",
+      `El correo no puede superar los ${LIMITES.email} caracteres.`,
       true
     );
   }
 
-  if (!esCorreoValido(correoLimpio)) {
+  if (!esCorreoValido(emailLimpio)) {
     return responderHtml(
       res,
       400,
-      "Error en el campo correo",
+      "Error en el campo email",
       "Debes indicar un correo electrónico válido.",
       true
     );
   }
 
-  if (!esTexto(comentario) || comentario.trim().length === 0) {
+  if (!esTexto(message) || message.trim().length === 0) {
     return responderHtml(
       res,
       400,
-      "Error en el campo comentario",
-      "El comentario es obligatorio.",
+      "Error en el campo message",
+      "El mensaje es obligatorio.",
       true
     );
   }
 
-  const comentarioLimpio = comentario.trim();
+  const messageLimpio = message.trim();
 
-  if (comentarioLimpio.length > LIMITES.comentario) {
+  if (messageLimpio.length > LIMITES.message) {
     return responderHtml(
       res,
       400,
-      "Error en el campo comentario",
-      `El comentario no puede superar los ${LIMITES.comentario} caracteres.`,
+      "Error en el campo message",
+      `El mensaje no puede superar los ${LIMITES.message} caracteres.`,
       true
     );
   }
 
-  return responderHtml(
-    res,
-    200,
-    "Mensaje recibido",
-    `Gracias por contactar con nosotros ${nombreLimpio}. Tu comentario: ${comentarioLimpio} ha sido anotado y nos pondremos en contacto contigo en el ${correoLimpio} lo más pronto posible.`
-  );
+  const mensajeConfirmacion = `Gracias por contactar con nosotros <strong>${escaparHtml(nameLimpio)}</strong>. Tu comentario: <strong>${escaparHtml(messageLimpio)}</strong> ha sido anotado y nos pondremos en contacto contigo en el <strong>${escaparHtml(emailLimpio)}</strong> lo más pronto posible.`;
+
+  return res
+    .status(200)
+    .type("html")
+    .send(crearPagina("Mensaje recibido", mensajeConfirmacion));
 });
 
 app.use((err, req, res, next) => {
